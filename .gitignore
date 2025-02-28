@@ -1,0 +1,6 @@
+*.mp4
+temp
+node_modules
+.DS_Store
+main2.ts
+nuclearcodes
