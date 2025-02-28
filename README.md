@@ -108,6 +108,87 @@ Try these alternative character sets for different effects:
 "█▓▒░ ";
 ```
 
+## 🔬 Technical Details
+
+### ASCII Conversion Logic
+
+The converter uses a sophisticated approach to transform video frames into colored ASCII art:
+
+#### 1. Brightness Calculation
+
+```typescript
+// Standard luminance formula for perceived brightness
+brightness = 0.299 * R + 0.587 * G + 0.114 * B;
+```
+
+This formula accounts for human perception of color, where green appears brighter than red, and blue appears darkest.
+
+#### 2. Character Selection
+
+- Each pixel region is mapped to an ASCII character based on its brightness
+- Brighter areas get lighter characters (e.g., ".", ":", "-")
+- Darker areas get denser characters (e.g., "@", "#", "%")
+- The mapping is normalized to use the full range of available characters
+
+#### 3. Smart Background Handling
+
+```typescript
+// Detect pure black/white areas
+if (isExtreme || brightness < 5 || brightness > 250) {
+  // Use space character for clean backgrounds
+  ascii[y][x] = " ";
+}
+```
+
+This creates clean, noise-free backgrounds by:
+
+- Detecting pure black/white regions
+- Converting them to spaces instead of ASCII characters
+- Preserving the original background color
+
+#### 4. Color Preservation
+
+```typescript
+// Calculate average color for each ASCII character
+colors[y][x] = {
+  r: Math.round(totalR / pixelCount),
+  g: Math.round(totalG / pixelCount),
+  b: Math.round(totalB / pixelCount),
+};
+```
+
+The converter maintains the original video's colors by:
+
+- Averaging the color values in each character's region
+- Applying the averaged color to the ASCII character
+- Adding a subtle shadow for better readability
+
+#### 5. Text Rendering
+
+```typescript
+// Add shadow for better contrast
+ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+ctx.fillText(char, x * 10 + 1, y * 20 + 1);
+
+// Draw colored character
+ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+ctx.fillText(char, x * 10, y * 20);
+```
+
+Characters are rendered with:
+
+- Bold monospace font for clarity
+- Subtle shadow for contrast
+- Centered alignment for better proportions
+- Original color from the video
+
+This combination of techniques produces ASCII art that:
+
+- Preserves the video's original colors and motion
+- Creates clean, readable output
+- Handles flat backgrounds elegantly
+- Maintains good contrast and readability
+
 ## 📝 License
 
 MIT License - feel free to use and modify!
