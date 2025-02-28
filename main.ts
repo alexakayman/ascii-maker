@@ -74,8 +74,23 @@ class YouTubeToAsciiConverter {
       );
 
       // Extract audio from source video
+      const url = new URL(this.options.videoUrl);
+      const startTimeSeconds = url.searchParams.get("t");
+      let timeOffset = "";
+      if (startTimeSeconds) {
+        const hours = Math.floor(Number(startTimeSeconds) / 3600);
+        const minutes = Math.floor((Number(startTimeSeconds) % 3600) / 60);
+        const seconds = Number(startTimeSeconds) % 60;
+        timeOffset = `-ss ${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      // Download audio starting from timestamp if specified
       await exec(
-        `yt-dlp -f "bestaudio[ext=m4a]" -o "${audioPath}" ${this.options.videoUrl}`
+        `yt-dlp -f "bestaudio[ext=m4a]" -o "${audioPath}" "${this.options.videoUrl}" && ` +
+          `ffmpeg -i "${audioPath}" ${timeOffset} -acodec copy "${audioPath}.tmp" && ` +
+          `mv "${audioPath}.tmp" "${audioPath}"`
       );
 
       // Combine ASCII video with audio
@@ -116,29 +131,79 @@ class YouTubeToAsciiConverter {
     const videoPath = path.join(this.options.tempDir, "video.mp4");
     console.log(`Downloading video from ${this.options.videoUrl}...`);
 
-    // Extract start time from URL if present
-    const url = new URL(this.options.videoUrl);
-    const startTime = url.searchParams.get("t");
-    const startArg = startTime ? `--download-sections "*${startTime}-inf"` : "";
+    try {
+      // Ensure the video path is properly quoted and escaped
+      const escapedVideoPath = videoPath.replace(/"/g, '\\"');
 
-    await exec(
-      `yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' ${startArg} -o "${videoPath}" ${this.options.videoUrl}`
-    );
+      // Download the full video first
+      await exec(
+        `yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' -o "${escapedVideoPath}" "${this.options.videoUrl}"`
+      );
 
-    console.log("Video downloaded successfully");
+      // Verify the video file exists and has size > 0
+      if (!fs.existsSync(videoPath) || fs.statSync(videoPath).size === 0) {
+        throw new Error("Video download failed or file is empty");
+      }
+
+      console.log("Video downloaded successfully");
+    } catch (error) {
+      console.error("Error downloading video:", error);
+      throw error;
+    }
   }
 
   private async extractFrames(): Promise<void> {
     const videoPath = path.join(this.options.tempDir, "video.mp4");
+    const framesPattern = path.join(this.tempFramesDir, "frame-%04d.png");
+
     console.log("Extracting frames...");
 
-    // Using ffmpeg to extract frames
-    // You need to have ffmpeg installed: https://ffmpeg.org/
-    await exec(
-      `ffmpeg -i "${videoPath}" -vf "fps=${this.options.framesPerSecond}" "${this.tempFramesDir}/frame-%04d.png"`
-    );
+    try {
+      // Ensure video file exists
+      if (!fs.existsSync(videoPath)) {
+        throw new Error("Video file not found for frame extraction");
+      }
 
-    console.log("Frames extracted successfully");
+      // Ensure frames directory exists
+      if (!fs.existsSync(this.tempFramesDir)) {
+        fs.mkdirSync(this.tempFramesDir, { recursive: true });
+      }
+
+      // Extract start time from URL if present
+      const url = new URL(this.options.videoUrl);
+      const startTimeSeconds = url.searchParams.get("t");
+
+      // Convert seconds to HH:MM:SS format for FFmpeg
+      let timeOffset = "";
+      if (startTimeSeconds) {
+        const hours = Math.floor(Number(startTimeSeconds) / 3600);
+        const minutes = Math.floor((Number(startTimeSeconds) % 3600) / 60);
+        const seconds = Number(startTimeSeconds) % 60;
+        timeOffset = `-ss ${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      // Escape paths for shell command
+      const escapedVideoPath = videoPath.replace(/"/g, '\\"');
+      const escapedFramesPattern = framesPattern.replace(/"/g, '\\"');
+
+      // Extract frames using ffmpeg with timestamp if specified
+      await exec(
+        `ffmpeg ${timeOffset} -i "${escapedVideoPath}" -vf "fps=${this.options.framesPerSecond}" "${escapedFramesPattern}"`
+      );
+
+      // Verify at least one frame was extracted
+      const frames = fs.readdirSync(this.tempFramesDir);
+      if (frames.length === 0) {
+        throw new Error("No frames were extracted from the video");
+      }
+
+      console.log(`Frames extracted successfully (${frames.length} frames)`);
+    } catch (error) {
+      console.error("Error extracting frames:", error);
+      throw error;
+    }
   }
 
   private async convertFramesToAscii(): Promise<void> {
