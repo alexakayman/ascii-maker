@@ -1,4 +1,5 @@
 *.mp4
+!ascii_video.mp4
 temp
 node_modules
 .DS_Store
