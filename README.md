@@ -75,6 +75,28 @@ Convert any YouTube video into a colorful ASCII art animation! Color + edge dete
 
 The final video will be saved as `ascii_video.mp4` in your current directory.
 
+### Adding Audio
+
+If you want to add audio to your ASCII video:
+
+1. Run the audio addition script:
+
+   ```bash
+   bun add_audio.ts
+   # or with node
+   node add_audio.ts
+   ```
+
+2. Enter the YouTube URL of the video you want to extract audio from
+
+   - This can be the same as your source video
+   - Or a different video if you want to mix things up!
+
+3. The script will:
+   - Download the audio from YouTube
+   - Combine it with your ASCII video
+   - Save the result as `ascii_video_with_audio.mp4`
+
 ## ⚙️ Configuration
 
 You can customize the conversion by modifying these parameters in `main.ts`:
