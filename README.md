@@ -67,17 +67,24 @@ Convert any YouTube video into a colorful ASCII art animation! Color + edge dete
 
 2. Enter a YouTube URL when prompted
 
+   - You can include a timestamp in the URL (e.g., `?t=117`) to start from that point
+   - The converter will automatically handle timestamps in the format `t=<seconds>`
+
 3. Wait for the magic to happen! The converter will:
-   - Download the video
+   - Download the video (starting from timestamp if specified)
    - Extract frames
    - Convert each frame to ASCII art
    - Reassemble into a video
+   - Automatically add the original audio track
 
-The final video will be saved as `ascii_video.mp4` in your current directory.
+The converter will create two files:
 
-### Adding Audio
+- `ascii_video.mp4` - ASCII video without audio
+- `ascii_video_with_audio.mp4` - ASCII video with the original audio track
 
-If you want to add audio to your ASCII video:
+### Custom Audio Track (Optional)
+
+If you want to use audio from a different video:
 
 1. Run the audio addition script:
 
@@ -89,8 +96,7 @@ If you want to add audio to your ASCII video:
 
 2. Enter the YouTube URL of the video you want to extract audio from
 
-   - This can be the same as your source video
-   - Or a different video if you want to mix things up!
+   - This can be any video, allowing you to create unique combinations!
 
 3. The script will:
    - Download the audio from YouTube

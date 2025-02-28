@@ -65,11 +65,34 @@ class YouTubeToAsciiConverter {
       await this.convertFramesToAscii();
       await this.createVideo();
 
+      // Automatically add audio from the source video
+      console.log("Adding audio from source video...");
+      const audioPath = path.join(this.options.tempDir, "audio.m4a");
+      const finalVideoPath = this.options.outputPath.replace(
+        ".mp4",
+        "_with_audio.mp4"
+      );
+
+      // Extract audio from source video
+      await exec(
+        `yt-dlp -f "bestaudio[ext=m4a]" -o "${audioPath}" ${this.options.videoUrl}`
+      );
+
+      // Combine ASCII video with audio
+      await exec(
+        `ffmpeg -i "${this.options.outputPath}" -i "${audioPath}" -c:v copy -c:a aac -shortest "${finalVideoPath}"`
+      );
+
+      console.log(`ASCII video with audio saved as: ${finalVideoPath}`);
+      console.log(
+        `Original ASCII video without audio preserved at: ${this.options.outputPath}`
+      );
+
       if (!this.options.tempDir.includes("keep-temp")) {
         await this.cleanup();
       }
 
-      return this.options.outputPath;
+      return finalVideoPath;
     } catch (error) {
       console.error("Error during conversion:", error);
       throw error;
@@ -93,8 +116,13 @@ class YouTubeToAsciiConverter {
     const videoPath = path.join(this.options.tempDir, "video.mp4");
     console.log(`Downloading video from ${this.options.videoUrl}...`);
 
+    // Extract start time from URL if present
+    const url = new URL(this.options.videoUrl);
+    const startTime = url.searchParams.get("t");
+    const startArg = startTime ? `--download-sections "*${startTime}-inf"` : "";
+
     await exec(
-      `yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' -o "${videoPath}" ${this.options.videoUrl}`
+      `yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' ${startArg} -o "${videoPath}" ${this.options.videoUrl}`
     );
 
     console.log("Video downloaded successfully");
