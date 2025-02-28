@@ -12,12 +12,9 @@ Convert any YouTube video into a colorful ASCII art animation! Color + edge dete
 
 ## 🎥 Example
 
-[Original Video](https://youtube.com/shorts/NcdUX-2Zguc?si=ta-q6SebWeXxxD8E)
+[Original Video](https://youtube.com/shorts/NcdUX-2Zguc?si=ta-q6SebWeXxxD8E) vs. [Results Video](https://www.youtube.com/watch?v=y35av6KwqYw)
 
-### Results Video
-
-Thumbnail below. Or click it to watch the full short on YT.
-[![ASCII Art Result](/results_thumbnail.png)](https://www.youtube.com/watch?v=y35av6KwqYw)
+[![ASCII Art Result](/RepoCover.png)](https://www.youtube.com/watch?v=y35av6KwqYw)
 
 ## ✨ Features
 
