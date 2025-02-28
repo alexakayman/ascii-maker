@@ -12,13 +12,20 @@ Convert any YouTube video into a colorful ASCII art animation! Color + edge dete
 
 ## 🎥 Example
 
-Pink Panther short (original video link here: \_\_).
-Results below:
-<video width="320" height="240" controls>
-
-  <source src="ascii_video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+<table>
+  <tr>
+    <td>
+      <strong>Original Video</strong><br>
+      <a href="https://youtube.com/shorts/NcdUX-2Zguc?si=ta-q6SebWeXxxD8E" target="_blank">Watch on YouTube</a><br>
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/NcdUX-2Zguc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </td>
+    <td>
+      <strong>ASCII Art Result</strong><br>
+      <a href="https://youtube.com/shorts/y35av6KwqYw" target="_blank">Watch on YouTube</a><br>
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/y35av6KwqYw" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </td>
+  </tr>
+</table>
 
 ## ✨ Features
 
